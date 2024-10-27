@@ -6,34 +6,43 @@ import math
 width = 1000
 height = 500
 
-G = 0.1
+G = 1
 
-def	norm(ax, ay, bx, by):
-	return math.sqrt(abs(ax - bx)**2 + abs(ay - by)**2)
+def	norm(a, b):
+	return math.sqrt(abs(a.x - b.x) ** 2 + abs(a.y - b.y) ** 2)
 
 class	particle:
 	def	__init__(self, x, y, radius, color):
 		self.x = x
 		self.y = y
-		self.velocity_x = 0
-		self.velocity_y = 0
+		self.speed_x = 0
+		self.speed_y = 0
 		self.radius = radius
 		self.color = color
+		self.ax = 0
+		self.ay = 0
 
-	def	move(self, dots, surface):
-		tmp_x = 0
-		tmp_y = 0
+	def	move(self, dots):
 		for dot in dots:
-			if norm(self.x, self.y, dot.x, dot.y) == 0:
-				tmp_x += 0
-			else:
-				tmp_x += 1 / norm(self.x, self.y, dot.x, dot.y) * (self.x - dot.x)
-			if norm(self.x, self.y, dot.x, dot.y) == 0:
-				tmp_y = 0
-			else:
-				tmp_y += 1 / norm(self.x, self.y, dot.x, dot.y) * (self.y - dot.y)
-		pygame.draw.line(surface, 0xFFFFFF, (self.x, self.y), (tmp_x, tmp_y))
+			r = norm(self, dot)
+			if r == 0:
+				continue
+			F = G / r ** 2
+			fx = F * (dot.x - self.x) / r
+			fy = F * (dot.y - self.y) / r
+			self.ax += fx
+			self.ay += fy
+			dot.ax -= fx
+			dot.ay -= fy
 
+		self.speed_x += self.ax
+		self.speed_y += self.ay
+		dot.speed_x += dot.ax
+		dot.speed_y += dot.ay
+		self.x += self.speed_x
+		self.y += self.speed_y
+		dot.x += dot.speed_x
+		dot.y += dot.speed_y
 		if self.x < 0:
 			self.x = width
 		if self.x > width:
@@ -42,6 +51,8 @@ class	particle:
 			self.y = height
 		if self.y > height:
 			self.y = 0
+		self.ax = 0
+		self.ay = 0
 
 	def	dep(self, keys):
 		if keys[pygame.K_UP]:
@@ -62,7 +73,7 @@ def	main():
 
 	screen = pygame.display.set_mode((width, height))
 
-	dots = [particle(random.randint(0, width / 2) + width / 2, random.randint(0, height / 2) + height / 2, 5, 0xF00000) for _ in range(2)]
+	dots = [particle(random.randint(0, width), random.randint(0, height), 2, 0xFFF50A4) for _ in range(100)]
 	running = True
 	while running:
 		for event in pygame.event.get():
@@ -71,12 +82,14 @@ def	main():
 	
 		screen.fill(0x0A022B)
 		i = 0
-		for i in range(2):
+		for i in range(len(dots)):
 			dots[i].draw(screen)
-			dots[i].move(dots, screen)
-		keys = pygame.key.get_pressed()
-		dots[0].dep(keys)
-		dots[0].draw(screen)
+			dots[i].move(dots)
+			dots[i].speed_y -= 1
+			dots[i].speed_x -= 1
+		#keys = pygame.key.get_pressed()
+		#dots[0].dep(keys)
+		#dots[0].draw(screen)
 		pygame.display.flip()
 		pygame.time.Clock().tick(60)
 
