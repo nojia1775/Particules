@@ -7,7 +7,7 @@ import string
 width = 1000
 height = 500
 
-G = 1
+G = 10000
 
 class	particle:
 	def	__init__(self, x, y, radius, color):
@@ -19,6 +19,14 @@ class	particle:
 		self.color = color
 		self.ax = 0
 		self.ay = 0
+
+	def	gravitation(self, dot):
+		if self != dot:
+			distance = math.sqrt((self.x - dot.x) ** 2 + (self.y - dot.y) ** 2)
+			if distance != 0:
+				force = G / (distance ** 2)
+				self.speed_x = force * ((dot.x - self.x) / distance)
+				self.speed_y = force * ((dot.y - self.y) / distance)
 
 	def	move(self):
 		self.x += self.speed_x
@@ -67,7 +75,7 @@ class	particle:
 		dx = self.x - b.x
 		dy = self.y - b.y
 		distance = math.hypot(dx, dy)
-		if distance == 0:
+		if distance <= 0.01:
 			return
 		nx = dx / distance
 		ny = dy / distance
@@ -76,6 +84,13 @@ class	particle:
 		self.speed_y -= p * ny
 		b.speed_x += p * nx
 		b.speed_y += p * ny
+		print(p * nx, p * ny)
+
+		overlap = (self.radius + b.radius - distance) / 2
+		self.x += overlap * nx
+		self.y += overlap * ny
+		b.x -= overlap * nx
+		b.y -= overlap * ny
 
 	def	detect_collision(self, b) -> bool:
 		distance = math.hypot(self.x - b.x, self.y - b.y)
@@ -86,21 +101,22 @@ def	main():
 
 	screen = pygame.display.set_mode((width, height))
 
-	dots = [particle(random.randint(0, width), random.randint(0, height), 5, 0xFFF50A4) for _ in range(100)]
+	dots = [particle(random.randint(0, width), random.randint(0, height), 2, 0xFFF50A4) for _ in range(10)]
 	running = True
 	while running:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = False
 	
-		screen.fill(0x0A022B)
+		screen.fill(0x0A021C)
 		i = 0
-		keys = pygame.key.get_pressed()
-		dots[0].control(keys)
+		#keys = pygame.key.get_pressed()
+		#dots[0].control(keys)
 		for i in range(len(dots)):
-			dots[i].draw(screen)
-			dots[i].move()
 			for j in range(len(dots)):
+				dots[i].gravitation(dots[j])
+				dots[i].draw(screen)
+				dots[i].move()
 				if dots[i].detect_collision(dots[j]) and i != j:
 					dots[i].deal_collision(dots[j])
 		pygame.display.flip()
