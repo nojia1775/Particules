@@ -2,31 +2,63 @@ import pygame
 import sys
 import random
 import math
-import string
 
-width = 1000
+ROUGE = 0
+JAUNE = 1
+
+nbr_particle = 300
+width = 500
 height = 500
 
 G = 10000
 
+"""
+	_________________
+	|rose	|jaune	|
+_________________________
+rose	|aime	|aime	|
+_________________________
+jaune	|deteste|aime	|
+_________________________
+
+"""
+ 
+interaction = [
+	[1, 1],
+	[-1, 1]
+]
+
+colors = [0xFFF50A4, 0xFFFF00]
+
+for i in range(len(interaction)):
+	for j in range(len(interaction[i])):
+		interaction[i][j]
+
 class	particle:
-	def	__init__(self, x, y, radius, color):
+	def	__init__(self, x, y, radius, color, type_part):
 		self.x = x
 		self.y = y
 		self.speed_x = 0
 		self.speed_y = 0
 		self.radius = radius
 		self.color = color
-		self.ax = 0
-		self.ay = 0
+		self.type = type_part
 
 	def	gravitation(self, dot):
 		if self != dot:
 			distance = math.sqrt((self.x - dot.x) ** 2 + (self.y - dot.y) ** 2)
 			if distance != 0:
-				force = G / (distance ** 2)
+				force = interaction[self.type][dot.type] * G / (distance ** 3)
 				self.speed_x = force * ((dot.x - self.x) / distance)
+				if self.speed_x > 0.5:
+					self.speed_x = 0.5
+				elif self.speed_x < -0.5:
+					self.speed_x = -0.5
 				self.speed_y = force * ((dot.y - self.y) / distance)
+				if self.speed_y > 0.5:
+					self.speed_y = 0.5
+				elif self.speed_y < -0.5:
+					self.speed_y = -0.5
 
 	def	move(self):
 		self.x += self.speed_x
@@ -57,13 +89,13 @@ class	particle:
 			self.y = 0
 
 		if keys[pygame.K_UP]:
-			self.speed_y -= 0.5
+			self.speed_y -= 5
 		elif keys[pygame.K_DOWN]:
-			self.speed_y += 0.5
+			self.speed_y += 5
 		elif keys[pygame.K_LEFT]:
-			self.speed_x -= 0.5
+			self.speed_x -= 5
 		elif keys[pygame.K_RIGHT]:
-			self.speed_x += 0.5
+			self.speed_x += 5
 		else:
 			self.speed_x = 0
 			self.speed_y = 0
@@ -84,7 +116,6 @@ class	particle:
 		self.speed_y -= p * ny
 		b.speed_x += p * nx
 		b.speed_y += p * ny
-		print(p * nx, p * ny)
 
 		overlap = (self.radius + b.radius - distance) / 2
 		self.x += overlap * nx
@@ -101,7 +132,9 @@ def	main():
 
 	screen = pygame.display.set_mode((width, height))
 
-	dots = [particle(random.randint(0, width), random.randint(0, height), 2, 0xFFF50A4) for _ in range(10)]
+
+	dots = [particle(random.randint(0, width), random.randint(0, height), 2, (colors[0] if i % 2 == 0 else colors[1]), ROUGE if i % 2 == 0 else JAUNE) for i in range(nbr_particle // 2)]
+
 	running = True
 	while running:
 		for event in pygame.event.get():
@@ -120,7 +153,7 @@ def	main():
 				if dots[i].detect_collision(dots[j]) and i != j:
 					dots[i].deal_collision(dots[j])
 		pygame.display.flip()
-		pygame.time.Clock().tick(60)
+		#pygame.time.Clock().tick(1000)
 
 	pygame.quit()
 	sys.exit()
