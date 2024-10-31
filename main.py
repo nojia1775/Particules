@@ -3,32 +3,42 @@ import sys
 import random
 import math
 
-ROUGE = 0
+ROSE = 0
 JAUNE = 1
+VERT = 2
 
-nbr_particle = 300
-width = 500
-height = 500
+nbr_particle = 200
+width = 1920
+height = 1080
 
 G = 10000
 
 """
-	_________________
-	|rose	|jaune	|
-_________________________
-rose	|aime	|aime	|
-_________________________
-jaune	|deteste|aime	|
-_________________________
+	_________________________
+	|rose	|jaune	|vert	|
+_________________________________
+rose	|blc	|aime	|deteste|
+_________________________________
+jaune	|deteste|blc	|blc	|
+_________________________________
+vert	|aime	|aime	|blc	|
+_________________________________
 
 """
  
 interaction = [
-	[1, 1],
-	[-1, 1]
+	[0, 1, -1],
+	[-1, 0, 0],
+	[1, 1, 0]
 ]
 
-colors = [0xFFF50A4, 0xFFFF00]
+colors = [0xFFF50A, 0xFFFF00]
+
+colors = [
+	[0x0000FF, ROSE],
+	[0xFFFF00, JAUNE],
+	[0x00FF00, VERT]
+]
 
 for i in range(len(interaction)):
 	for j in range(len(interaction[i])):
@@ -48,7 +58,7 @@ class	particle:
 		if self != dot:
 			distance = math.sqrt((self.x - dot.x) ** 2 + (self.y - dot.y) ** 2)
 			if distance != 0:
-				force = interaction[self.type][dot.type] * G / (distance ** 3)
+				force = interaction[self.type][dot.type] * G / (distance ** 2)
 				self.speed_x = force * ((dot.x - self.x) / distance)
 				if self.speed_x > 0.5:
 					self.speed_x = 0.5
@@ -132,8 +142,9 @@ def	main():
 
 	screen = pygame.display.set_mode((width, height))
 
-
-	dots = [particle(random.randint(0, width), random.randint(0, height), 2, (colors[0] if i % 2 == 0 else colors[1]), ROUGE if i % 2 == 0 else JAUNE) for i in range(nbr_particle // 2)]
+	dots = []
+	for i in range(0, nbr_particle):
+		dots.append(particle(random.randint(0, width), random.randint(0, height), 2, colors[i % 3][0], colors[i % 3][1]))
 
 	running = True
 	while running:
@@ -142,9 +153,6 @@ def	main():
 				running = False
 	
 		screen.fill(0x0A021C)
-		i = 0
-		#keys = pygame.key.get_pressed()
-		#dots[0].control(keys)
 		for i in range(len(dots)):
 			for j in range(len(dots)):
 				dots[i].gravitation(dots[j])
