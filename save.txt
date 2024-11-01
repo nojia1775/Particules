@@ -1,0 +1,43 @@
+[croix bleu
+
+	    _________________________
+	    |bleu	|jaune	|vert	|
+_________________________________
+bleu	|deteste|aime	|deteste|
+_________________________________
+jaune	|null	|aime	|aime	|
+_________________________________
+vert	|deteste|aime	|null	|
+_________________________________
+
+# plus c'est petit plus c'est le chaos (3 = mid)
+chaos = 3
+ 
+interaction = [
+    [-1, 0, -1],
+    [0, 0, 1],
+    [-1, 0, -1]
+]
+
+___________________________________________________________________________________
+[micro organismes
+
+	_________________________
+	|bleu	|jaune	|rouge	|
+_________________________________
+bleu	|deteste|null	|deteste|
+_________________________________
+jaune	|null	|null	|aime	|
+_________________________________
+rouge	|deteste|null	|deteste|
+_________________________________
+
+# plus c'est petit plus c'est le chaos (3 = mid)
+chaos = 3
+ 
+interaction = [
+    [-1, 0, -1],
+    [0, 0, 1],
+    [-1, 0, -1]
+
+]

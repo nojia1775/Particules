@@ -3,41 +3,43 @@ import sys
 import random
 import math
 
-ROSE = 0
+BLEU = 0
 JAUNE = 1
-VERT = 2
+ROUGE = 2
 
 nbr_particle = 200
-width = 1920
-height = 1080
+width = 500
+height = 500
 
 G = 10000
 
 """
 	_________________________
-	|rose	|jaune	|vert	|
+	 |bleu	|jaune	|vert	|
 _________________________________
-rose	|blc	|aime	|deteste|
+bleu	|deteste|aime	|deteste|
 _________________________________
-jaune	|deteste|blc	|blc	|
+jaune	|null	|aime	|aime	|
 _________________________________
-vert	|aime	|aime	|blc	|
+vert	|deteste|aime	|null	|
 _________________________________
-
 """
+
+# plus c'est petit plus c'est le chaos (3 = mid)
+chaos = 2
  
 interaction = [
-	[0, 1, -1],
-	[-1, 0, 0],
-	[1, 1, 0]
+    [-1, 10, -1],
+    [0, 1, 1],
+    [-1, 1, 0]
 ]
 
 colors = [0xFFF50A, 0xFFFF00]
 
 colors = [
-	[0x0000FF, ROSE],
+	[0x0000FF, BLEU],
 	[0xFFFF00, JAUNE],
-	[0x00FF00, VERT]
+	[0xFF0000, ROUGE]
 ]
 
 for i in range(len(interaction)):
@@ -58,7 +60,7 @@ class	particle:
 		if self != dot:
 			distance = math.sqrt((self.x - dot.x) ** 2 + (self.y - dot.y) ** 2)
 			if distance != 0:
-				force = interaction[self.type][dot.type] * G / (distance ** 2)
+				force = interaction[self.type][dot.type] * G / (distance ** chaos)
 				self.speed_x = force * ((dot.x - self.x) / distance)
 				if self.speed_x > 0.5:
 					self.speed_x = 0.5
@@ -135,7 +137,7 @@ class	particle:
 
 	def	detect_collision(self, b) -> bool:
 		distance = math.hypot(self.x - b.x, self.y - b.y)
-		return distance <= self.radius + b.radius
+		return distance <= self.radius + b.radius + 1
 		
 def	main():
 	pygame.init()
